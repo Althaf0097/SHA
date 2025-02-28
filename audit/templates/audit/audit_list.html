@@ -1,0 +1,189 @@
+{% extends 'audit/base.html' %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Welcome Section -->
+    <div class="welcome-section mb-4">
+        <h1 class="display-4 mb-3">Welcome to FIELD AUDIT INSIGHT</h1>
+        <p class="lead text-muted">Monitor and manage your healthcare audits efficiently</p>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Field Audits</h6>
+                            <h2 class="card-title mb-0">{{ audits.count }}</h2>
+                        </div>
+                        <i class="fas fa-clipboard-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Total Patients</h6>
+                            <h2 class="card-title mb-0">{{ total_patients }}</h2>
+                        </div>
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">This Month</h6>
+                            <h2 class="card-title mb-0">{{ monthly_audits }}</h2>
+                        </div>
+                        <i class="fas fa-calendar-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2">Pending Review</h6>
+                            <h2 class="card-title mb-0">{{ pending_reviews }}</h2>
+                        </div>
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <a href="{% url 'audit_form' %}" class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus-circle fa-3x mb-3"></i>
+                    <h5 class="card-title">New Audit</h5>
+                    <p class="card-text">Create a new field audit report</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'view_records' %}" class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-3x mb-3"></i>
+                    <h5 class="card-title">View Records</h5>
+                    <p class="card-text">Access all audit records</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'report' %}" class="card action-card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                    <h5 class="card-title">Analytics</h5>
+                    <p class="card-text">View audit statistics and reports</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="/admin" class="card action-card h-100" target="_blank">
+                <div class="card-body text-center">
+                    <i class="fas fa-cog fa-3x mb-3"></i>
+                    <h5 class="card-title">Admin Panel</h5>
+                    <p class="card-text">Manage system settings</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">System Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="overview-stats">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Total Field Audits</span>
+                            <span class="badge bg-primary">{{ total_ehcps }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Districts Covered</span>
+                            <span class="badge bg-success">{{ total_districts }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Active Auditors</span>
+                            <span class="badge bg-info">{{ active_auditors }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Completion Rate</span>
+                            <span class="badge bg-warning">{{ completion_rate }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .welcome-section {
+        text-align: center;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .stats-card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        background-color: white;
+    }
+
+    .overview-stats .badge {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .dashboard {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}

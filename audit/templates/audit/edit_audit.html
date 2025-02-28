@@ -1,0 +1,171 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="text-dark mb-4">Field Audit Form</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Audit Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="district">Select District*</label>
+                            <select class="form-control" id="district" name="district" required>
+                                <option value="">Select District</option>
+                                {% for district in districts %}
+                                <option value="{{ district.id }}" {% if audit.district.id == district.id %}selected{% endif %}>{{ district.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hospital_id">Hospital ID*</label>
+                            <input type="text" class="form-control" id="hospital_id" name="hospital_id" value="{{ audit.hospital_id }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="auditor_name">Name of Auditor*</label>
+                            <input type="text" class="form-control" id="auditor_name" name="auditor_name" value="{{ audit.auditor_name }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ehcp_name">Name of EHCP*</label>
+                            <input type="text" class="form-control" id="ehcp_name" name="ehcp_name" value="{{ audit.ehcp_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ehcp_type">EHCP Type*</label>
+                            <select class="form-control" id="ehcp_type" name="ehcp_type" required>
+                                <option value="">Select Type</option>
+                                {% for type_choice in audit.EHCP_TYPES %}
+                                <option value="{{ type_choice.0 }}" {% if audit.ehcp_type == type_choice.0 %}selected{% endif %}>{{ type_choice.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="designation">Designation*</label>
+                            <input type="text" class="form-control" id="designation" name="designation" value="{{ audit.designation }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="visit_date">Date of Visit*</label>
+                            <input type="date" class="form-control" id="visit_date" name="visit_date" value="{{ audit.visit_date|date:'Y-m-d' }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="visit_time">Time*</label>
+                            <input type="time" class="form-control" id="visit_time" name="visit_time" value="{{ audit.visit_time|time:'H:i' }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="ekgp_patients">Number of EKGP Patient Admitted (Hospital Record)*</label>
+                            <input type="number" class="form-control" id="ekgp_patients" name="ekgp_patients" value="{{ audit.ekgp_patients }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="pmjay_patients">Number of EKGP Patient Admitted (TMS)*</label>
+                            <input type="number" class="form-control" id="pmjay_patients" name="pmjay_patients" value="{{ audit.pmjay_patients }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="beneficiaries">Number of Beneficiaries Visited During Audit*</label>
+                            <input type="number" class="form-control" id="beneficiaries" name="beneficiaries" value="{{ audit.beneficiaries }}" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Overall Findings</h6>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label>OVERALL FINDINGS*</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="findings_type" value="audit_findings" {% if audit.findings_type == 'audit_findings' %}checked{% endif %} required>
+                        <label class="form-check-label">AUDIT FINDINGS</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="findings_type" value="hnqa_related" {% if audit.findings_type == 'hnqa_related' %}checked{% endif %}>
+                        <label class="form-check-label">HNQA RELATED</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="findings_type" value="other_fraudulent_activities" {% if audit.findings_type == 'other_fraudulent_activities' %}checked{% endif %}>
+                        <label class="form-check-label">ANY OTHER FRAUDULENT ACTIVITIES</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="observations">Overall Audit Observation*</label>
+                    <textarea class="form-control" id="observations" name="observations" rows="4" required>{{ audit.observations }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="photos">Upload Photos*</label>
+                    <input type="file" class="form-control-file" id="photos" name="audit_photos" multiple accept="image/*">
+                    {% if audit.photos %}
+                    <div class="mt-2">
+                        <p>Current Photos:</p>
+                        {% for photo in audit.photos %}
+                        <img src="{{ photo }}" class="img-thumbnail" style="max-width: 200px; margin: 5px;">
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="signature">Digital Signature*</label>
+                    <div id="signature-pad" class="signature-pad">
+                        <canvas></canvas>
+                    </div>
+                    <input type="hidden" name="signature_data" id="signature_data" value="{{ audit.signature }}">
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" id="clear-signature">Clear Signature</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'audit_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.querySelector("#signature-pad canvas");
+        const signaturePad = new SignaturePad(canvas);
+        
+        document.querySelector('#clear-signature').addEventListener('click', function() {
+            signaturePad.clear();
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!signaturePad.isEmpty()) {
+                const signatureData = signaturePad.toDataURL();
+                document.querySelector('#signature_data').value = signatureData;
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

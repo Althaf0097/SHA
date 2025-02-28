@@ -1,0 +1,126 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="text-dark mb-4">Field Audit Details</h2>
+    
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Audit Information</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold">District:</label>
+                        <p>{{ audit.district.name }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Hospital ID:</label>
+                        <p>{{ audit.hospital_id }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Name of Auditor:</label>
+                        <p>{{ audit.auditor_name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Name of EHCP:</label>
+                        <p>{{ audit.ehcp_name }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">EHCP Type:</label>
+                        <p>{{ audit.get_ehcp_type_display }}</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold">Designation:</label>
+                        <p>{{ audit.designation }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Date of Visit:</label>
+                        <p>{{ audit.visit_date }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Time:</label>
+                        <p>{{ audit.visit_time }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Number of EKGP Patient Admitted (Hospital Record):</label>
+                        <p>{{ audit.ekgp_patients }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Number of EKGP Patient Admitted (TMS):</label>
+                        <p>{{ audit.pmjay_patients }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Number of Beneficiaries Visited During Audit:</label>
+                        <p>{{ audit.beneficiaries }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Overall Findings</h6>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label class="font-weight-bold">OVERALL FINDINGS:</label>
+                <p>{{ audit.get_findings_type_display }}</p>
+            </div>
+
+            <div class="form-group">
+                <label class="font-weight-bold">Overall Audit Observation:</label>
+                <p>{{ audit.observations }}</p>
+            </div>
+
+            {% if audit.photos %}
+            <div class="form-group">
+                <label class="font-weight-bold">Audit Photos:</label>
+                <div class="row mt-2">
+                    {% for photo in audit.photos %}
+                    <div class="col-md-3 mb-3">
+                        <img src="{{ photo }}" class="img-fluid rounded" alt="Audit Photo">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if audit.signature %}
+            <div class="form-group">
+                <label class="font-weight-bold">Digital Signature:</label>
+                <div class="mt-2">
+                    <img src="{{ audit.signature }}" class="img-fluid" style="max-width: 300px;" alt="Digital Signature">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mb-4">
+        <a href="{% url 'edit_audit' audit.id %}" class="btn btn-primary">Edit Audit</a>
+        <a href="{% url 'audit_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+{% endblock %}

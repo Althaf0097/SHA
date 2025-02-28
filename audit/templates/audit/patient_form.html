@@ -1,0 +1,182 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card bg-gradient-primary text-white mb-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 mb-0">Patient Details</h1>
+                    <p class="lead mb-0">{{ audit.ehcp_name }} - {{ audit.visit_date }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <div class="row g-4">
+                    <!-- Basic Information -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Case ID / IP Number*</label>
+                            <input type="text" class="form-control form-control-lg" name="case_id" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Patient Name*</label>
+                            <input type="text" class="form-control form-control-lg" name="patient_name" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control form-control-lg" name="mobile_number">
+                        </div>
+                    </div>
+
+                    <!-- Admission Details -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Admission Date*</label>
+                            <input type="date" class="form-control form-control-lg" name="admission_date" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Discharge Date*</label>
+                            <input type="date" class="form-control form-control-lg" name="discharge_date" required>
+                        </div>
+                    </div>
+
+                    <!-- Package Details -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Package Name*</label>
+                            <input type="text" class="form-control form-control-lg" name="package_name" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Package Code</label>
+                            <input type="text" class="form-control form-control-lg" name="package_code">
+                        </div>
+                    </div>
+
+                    <!-- Deviations -->
+                    <div class="col-12">
+                        <h4 class="mb-3">Deviations Found</h4>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="missing_records" id="missing_records">
+                            <label class="form-check-label" for="missing_records">Missing Records</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="money_collection" id="money_collection">
+                            <label class="form-check-label" for="money_collection">Money Collection</label>
+                        </div>
+                    </div>
+
+                    <!-- Case Summary -->
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="form-label">Case Summary / Remarks</label>
+                            <textarea class="form-control form-control-lg" name="case_summary" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Fields -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Patient Photo</label>
+                            <input type="file" class="form-control form-control-lg" name="patient_photo" accept="image/*">
+                            <small class="text-muted">Accepted formats: JPG, JPEG, PNG</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Case File</label>
+                            <input type="file" class="form-control form-control-lg" name="case_file" accept=".pdf,.doc,.docx,image/*">
+                            <small class="text-muted">Accepted formats: PDF, DOC, DOCX, Images</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Discharge Summary</label>
+                            <input type="file" class="form-control form-control-lg" name="discharge_summary" accept=".pdf,.doc,.docx,image/*">
+                            <small class="text-muted">Accepted formats: PDF, DOC, DOCX, Images</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Bills & Documents</label>
+                            <input type="file" class="form-control form-control-lg" name="bills_documents" accept=".pdf,image/*">
+                            <small class="text-muted">Accepted formats: PDF, Images</small>
+                        </div>
+                    </div>
+
+                    <!-- OOPE Amount -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Total Out of Pocket Expenses (OOPE)</label>
+                            <input type="number" step="0.01" class="form-control form-control-lg" name="total_oope" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" name="add_another" class="btn btn-secondary btn-lg">Save & Add Another Patient</button>
+                    <button type="submit" class="btn btn-primary btn-lg">Save & Complete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #1a237e, #0d47a1);
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<script>
+    // Add date validation
+    const admissionDateInput = document.querySelector('input[name="admission_date"]');
+    const dischargeDateInput = document.querySelector('input[name="discharge_date"]');
+
+    admissionDateInput.addEventListener('change', validateDate);
+    dischargeDateInput.addEventListener('change', validateDate);
+
+    function validateDate(event) {
+        const input = event.target;
+        const value = input.value;
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format
+
+        if (!dateRegex.test(value)) {
+            input.setCustomValidity('Invalid date format. Please use YYYY-MM-DD.');
+        } else {
+            input.setCustomValidity('');
+        }
+    }
+</script>
+{% endblock %}

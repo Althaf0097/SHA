@@ -1,0 +1,1133 @@
+{% extends 'audit/base.html' %} {% load static %} {% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="card bg-gradient-primary text-white mb-3">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="display-5 mb-0">FIELD AUDIT FORM</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form
+    method="post"
+    id="auditForm"
+    class="needs-validation"
+    enctype="multipart/form-data"
+    novalidate
+  >
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-transparent">
+            <h4 class="mb-0">
+              <i class="fas fa-clipboard-check me-2"></i>Audit Information
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <!-- District Name -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">District Name*</label>
+                  <select
+                    class="form-select form-select-lg"
+                    name="district"
+                    required
+                  >
+                    <option value="">Select District</option>
+                    {% for district in districts %}
+                    <option value="{{ district }}">{{ district }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Name of EHCP -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">Name of EHCP*</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    name="ehcp_name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Hospital ID -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">Hospital ID*</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    name="hospital_id"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- EHCP Type -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">EHCP Type*</label>
+                  <select
+                    class="form-select form-select-lg"
+                    name="ehcp_type"
+                    required
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Public">Public</option>
+                    <option value="Private">Private</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Name of Auditor -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">Name of Auditor*</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    name="auditor_name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Designation -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="form-label">Designation*</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg"
+                    name="designation"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Date of Visit -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Date of Visit*</label>
+                  <input
+                    type="date"
+                    class="form-control form-control-lg"
+                    name="visit_date"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Time -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Time*</label>
+                  <input
+                    type="time"
+                    class="form-control form-control-lg"
+                    name="visit_time"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Location -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label">Location*</label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control form-control-lg"
+                      name="location"
+                      id="location"
+                      required
+                      readonly
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      id="getLocation"
+                    >
+                      <i class="fas fa-map-marker-alt"></i> Get Location
+                    </button>
+                  </div>
+                  <input type="hidden" name="latitude" id="latitude" />
+                  <input type="hidden" name="longitude" id="longitude" />
+                </div>
+              </div>
+
+              <!-- KASP Patient Records -->
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label"
+                    >Number of KASP Patient Admitted (Hospital Record)*</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control form-control-lg"
+                    name="kasp_hospital_record"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label"
+                    >Number of KASP Patient Admitted (TMS)*</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control form-control-lg"
+                    name="kasp_tms_record"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="form-label"
+                    >Number of Beneficiaries Visited During Audit*</label
+                  >
+                  <input
+                    type="number"
+                    class="form-control form-control-lg"
+                    name="beneficiaries_visited"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- OVERALL FINDINGS -->
+              <div class="col-12">
+                <h5 class="mb-3">OVERALL FINDINGS*</h5>
+                <div class="mb-3">
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input findings-type"
+                        type="radio"
+                        name="findings_type"
+                        value="audit_findings"
+                        id="audit_findings"
+                        required
+                      />
+                      <label class="form-check-label" for="audit_findings"
+                        >AUDIT FINDINGS</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input findings-type"
+                        type="radio"
+                        name="findings_type"
+                        value="hnqa_related"
+                        id="hnqa_related"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_related"
+                        >HNQA RELATED</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input findings-type"
+                        type="radio"
+                        name="findings_type"
+                        value="other_fraudulent_activities"
+                        id="other_fraudulent_activities"
+                        required
+                      />
+                      <label
+                        class="form-check-label"
+                        for="other_fraudulent_activities"
+                        >Other Fraudulent Activities</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Yes/No options for Audit Findings -->
+                <div
+                  id="audit_findings_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label"
+                    >Select Option for Audit Findings*</label
+                  >
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input audit-finding-value"
+                        type="radio"
+                        name="audit_findings_value"
+                        value="Yes"
+                        id="audit_findings_yes"
+                        required
+                      />
+                      <label class="form-check-label" for="audit_findings_yes"
+                        >Yes</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input audit-finding-value"
+                        type="radio"
+                        name="audit_findings_value"
+                        value="No"
+                        id="audit_findings_no"
+                        required
+                      />
+                      <label class="form-check-label" for="audit_findings_no"
+                        >No</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Additional options for Yes selection -->
+                <div
+                  id="audit_findings_yes_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label">Select Finding Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input finding-type"
+                        type="radio"
+                        name="finding_type"
+                        value="abuse"
+                        id="finding_abuse"
+                        required
+                      />
+                      <label class="form-check-label" for="finding_abuse"
+                        >Abuse</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input finding-type"
+                        type="radio"
+                        name="finding_type"
+                        value="oope"
+                        id="finding_oope"
+                        required
+                      />
+                      <label class="form-check-label" for="finding_oope"
+                        >OOPE</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input finding-type"
+                        type="radio"
+                        name="finding_type"
+                        value="denial_of_service"
+                        id="finding_denial"
+                        required
+                      />
+                      <label class="form-check-label" for="finding_denial"
+                        >Denial of Service</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sub-options for Abuse -->
+                <div id="abuse_options" class="mb-3" style="display: none">
+                  <label class="form-label">Select Abuse Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="abuse_type"
+                        value="upcoding"
+                        id="abuse_upcoding"
+                        required
+                      />
+                      <label class="form-check-label" for="abuse_upcoding"
+                        >Upcoding</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="abuse_type"
+                        value="unbundling"
+                        id="abuse_unbundling"
+                        required
+                      />
+                      <label class="form-check-label" for="abuse_unbundling"
+                        >Unbundling</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sub-options for OOPE -->
+                <div id="oope_options" class="mb-3" style="display: none">
+                  <label class="form-label">Select OOPE Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="oope_type"
+                        value="direct_oope"
+                        id="oope_direct"
+                        required
+                      />
+                      <label class="form-check-label" for="oope_direct"
+                        >Direct OOPE</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="oope_type"
+                        value="indirect_oope"
+                        id="oope_indirect"
+                        required
+                      />
+                      <label class="form-check-label" for="oope_indirect"
+                        >Indirect OOPE</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Yes/No options for HNQA -->
+                <div id="hnqa_options" class="mb-3" style="display: none">
+                  <label class="form-label"
+                    >Select Option for HNQA RELATED*</label
+                  >
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input hnqa-value"
+                        type="radio"
+                        name="hnqa_value"
+                        value="Yes"
+                        id="hnqa_yes"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_yes">Yes</label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input hnqa-value"
+                        type="radio"
+                        name="hnqa_value"
+                        value="No"
+                        id="hnqa_no"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_no">No</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- HNQA Yes Options -->
+                <div id="hnqa_yes_options" class="mb-3" style="display: none">
+                  <label class="form-label">Select HNQA Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input hnqa-type"
+                        type="radio"
+                        name="hnqa_type"
+                        value="infrastructure"
+                        id="hnqa_infrastructure"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_infrastructure"
+                        >Infrastructure</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input hnqa-type"
+                        type="radio"
+                        name="hnqa_type"
+                        value="human_resource"
+                        id="hnqa_human_resource"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_human_resource"
+                        >Human Resource</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input hnqa-type"
+                        type="radio"
+                        name="hnqa_type"
+                        value="other_services"
+                        id="hnqa_other_services"
+                        required
+                      />
+                      <label class="form-check-label" for="hnqa_other_services"
+                        >Other Services</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Infrastructure Options -->
+                <div
+                  id="infrastructure_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label">Select Infrastructure Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="infrastructure_type"
+                        value="KIOSK"
+                        id="infra_KIOSK"
+                        required
+                      />
+                      <label class="form-check-label" for="infra_KIOSK"
+                        >KIOSK</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="infrastructure_type"
+                        value="promotional_board"
+                        id="infra_promotional_board"
+                        required
+                      />
+                      <label
+                        class="form-check-label"
+                        for="infra_promotional_board"
+                        >Promotional Board</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="infrastructure_type"
+                        value="bed_strength"
+                        id="infra_bed_strength"
+                        required
+                      />
+                      <label class="form-check-label" for="infra_bed_strength"
+                        >Bed Strength</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Human Resource Options -->
+                <div
+                  id="human_resource_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label">Select Human Resource Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="hr_type"
+                        value="pmam_availability"
+                        id="hr_pmam"
+                        required
+                      />
+                      <label class="form-check-label" for="hr_pmam"
+                        >Availability of PMAM</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="hr_type"
+                        value="nurses_availability"
+                        id="hr_nurses"
+                        required
+                      />
+                      <label class="form-check-label" for="hr_nurses"
+                        >Availability of Adequate Number of Nurses</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="hr_type"
+                        value="doctors_availability"
+                        id="hr_doctors"
+                        required
+                      />
+                      <label class="form-check-label" for="hr_doctors"
+                        >Availability of On Duty Doctors at the time of
+                        visit,RMO,Emergency doctor,ICU doctor</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Other Services Options -->
+                <div
+                  id="other_services_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label">Select Other Services Type*</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="services_type"
+                        value="fire_extinguisher"
+                        id="service_fire"
+                        required
+                      />
+                      <label class="form-check-label" for="service_fire"
+                        >Fire Extinguisher</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="services_type"
+                        value="hfr"
+                        id="service_hfr"
+                        required
+                      />
+                      <label class="form-check-label" for="service_hfr"
+                        >HFR</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="services_type"
+                        value="certificates"
+                        id="service_certificates"
+                        required
+                      />
+                      <label class="form-check-label" for="service_certificates"
+                        >All Relevant Certificates</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="services_type"
+                        value="registers"
+                        id="service_registers"
+                        required
+                      />
+                      <label class="form-check-label" for="service_registers"
+                        >Availability of IPD/OPD/OT Register</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Yes/No options for Fraudulent Activities -->
+                <div id="fraudulent_options" class="mb-3" style="display: none">
+                  <label class="form-label"
+                    >Select Option for Fraudulent Activities*</label
+                  >
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input fraudulent-value"
+                        type="radio"
+                        name="fraudulent_value"
+                        value="Yes"
+                        id="fraudulent_yes"
+                        required
+                      />
+                      <label class="form-check-label" for="fraudulent_yes"
+                        >Yes</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input fraudulent-value"
+                        type="radio"
+                        name="fraudulent_value"
+                        value="No"
+                        id="fraudulent_no"
+                        required
+                      />
+                      <label class="form-check-label" for="fraudulent_no"
+                        >No</label
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fraudulent Activities Yes Options -->
+                <div
+                  id="fraudulent_yes_options"
+                  class="mb-3"
+                  style="display: none"
+                >
+                  <label class="form-label"
+                    >Select Fraudulent Activity Type*</label
+                  >
+                  <div class="d-flex flex-column gap-3">
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="fraudulent_type"
+                        value="falsification_nonexisting"
+                        id="fraudulent_falsification_nonexisting"
+                        required
+                      />
+                      <label
+                        class="form-check-label"
+                        for="fraudulent_falsification_nonexisting"
+                        >Falsification of a claim or treatment record in respect
+                        of non existing patients</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="fraudulent_type"
+                        value="falsification_opd_ipd"
+                        id="fraudulent_falsification_opd_ipd"
+                        required
+                      />
+                      <label
+                        class="form-check-label"
+                        for="fraudulent_falsification_opd_ipd"
+                        >Falsification of treatment record to convert OPD into
+                        IPD</label
+                      >
+                    </div>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="radio"
+                        name="fraudulent_type"
+                        value="impersonation"
+                        id="fraudulent_impersonation"
+                        required
+                      />
+                      <label
+                        class="form-check-label"
+                        for="fraudulent_impersonation"
+                        >Impersonation either of the hospital or
+                        beneficiary</label
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Overall Audit Observation -->
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label">Overall Audit Observation*</label>
+                  <textarea
+                    class="form-control form-control-lg"
+                    name="audit_observation"
+                    rows="4"
+                    required
+                  ></textarea>
+                </div>
+              </div>
+
+              <!-- Photo Upload -->
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label">Upload Photos*</label>
+                  <input
+                    type="file"
+                    class="form-control form-control-lg"
+                    name="audit_photos"
+                    accept="image/*"
+                    multiple
+                    required
+                  />
+                  <small class="text-muted"
+                    >You can select multiple photos</small
+                  >
+                </div>
+              </div>
+
+              <!-- Digital Signature -->
+              <div class="col-12">
+                <div class="form-group">
+                  <label class="form-label">Digital Signature*</label>
+                  <div class="border rounded p-3">
+                    <canvas
+                      id="signatureCanvas"
+                      width="100%"
+                      height="200"
+                      class="border w-100"
+                    ></canvas>
+                    <input
+                      type="hidden"
+                      name="signature_data"
+                      id="signatureData"
+                    />
+                    <div class="mt-2">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="clearSignature"
+                      >
+                        Clear Signature
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary btn-lg">
+          Submit Audit
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Add this at the end of the file -->
+<script>
+  document.querySelectorAll(".findings-type").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const auditFindingsOptions = document.getElementById(
+        "audit_findings_options"
+      );
+      const hnqaOptions = document.getElementById("hnqa_options");
+      const fraudulentOptions = document.getElementById("fraudulent_options");
+      const auditFindingsYesOptions = document.getElementById(
+        "audit_findings_yes_options"
+      );
+      const hnqaYesOptions = document.getElementById("hnqa_yes_options");
+      const fraudulentYesOptions = document.getElementById(
+        "fraudulent_yes_options"
+      );
+      const infrastructureOptions = document.getElementById(
+        "infrastructure_options"
+      );
+      const humanResourceOptions = document.getElementById(
+        "human_resource_options"
+      );
+      const otherServicesOptions = document.getElementById(
+        "other_services_options"
+      );
+
+      // Hide all options first
+      [
+        auditFindingsOptions,
+        hnqaOptions,
+        fraudulentOptions,
+        auditFindingsYesOptions,
+        hnqaYesOptions,
+        fraudulentYesOptions,
+        infrastructureOptions,
+        humanResourceOptions,
+        otherServicesOptions,
+      ].forEach((el) => {
+        if (el) el.style.display = "none";
+      });
+
+      // Show relevant options
+      if (this.value === "audit_findings") {
+        auditFindingsOptions.style.display = "block";
+      } else if (this.value === "hnqa_related") {
+        hnqaOptions.style.display = "block";
+      } else if (this.value === "other_fraudulent_activities") {
+        fraudulentOptions.style.display = "block";
+      }
+    });
+  });
+
+  document.querySelectorAll(".fraudulent-value").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const fraudulentYesOptions = document.getElementById(
+        "fraudulent_yes_options"
+      );
+      if (this.value === "Yes") {
+        fraudulentYesOptions.style.display = "block";
+      } else {
+        fraudulentYesOptions.style.display = "none";
+      }
+    });
+  });
+
+  document.querySelectorAll(".hnqa-value").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const hnqaYesOptions = document.getElementById("hnqa_yes_options");
+      const infrastructureOptions = document.getElementById(
+        "infrastructure_options"
+      );
+      const humanResourceOptions = document.getElementById(
+        "human_resource_options"
+      );
+      const otherServicesOptions = document.getElementById(
+        "other_services_options"
+      );
+
+      [
+        hnqaYesOptions,
+        infrastructureOptions,
+        humanResourceOptions,
+        otherServicesOptions,
+      ].forEach((el) => {
+        if (el) el.style.display = "none";
+      });
+
+      if (this.value === "Yes") {
+        hnqaYesOptions.style.display = "block";
+      }
+    });
+  });
+
+  document.querySelectorAll(".hnqa-type").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const infrastructureOptions = document.getElementById(
+        "infrastructure_options"
+      );
+      const humanResourceOptions = document.getElementById(
+        "human_resource_options"
+      );
+      const otherServicesOptions = document.getElementById(
+        "other_services_options"
+      );
+
+      [
+        infrastructureOptions,
+        humanResourceOptions,
+        otherServicesOptions,
+      ].forEach((el) => {
+        if (el) el.style.display = "none";
+      });
+
+      if (this.value === "infrastructure") {
+        infrastructureOptions.style.display = "block";
+      } else if (this.value === "human_resource") {
+        humanResourceOptions.style.display = "block";
+      } else if (this.value === "other_services") {
+        otherServicesOptions.style.display = "block";
+      }
+    });
+  });
+
+  document.querySelectorAll(".audit-finding-value").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const auditFindingsYesOptions = document.getElementById(
+        "audit_findings_yes_options"
+      );
+      const abuseOptions = document.getElementById("abuse_options");
+      const oopeOptions = document.getElementById("oope_options");
+      if (this.value === "Yes") {
+        auditFindingsYesOptions.style.display = "block";
+      } else {
+        auditFindingsYesOptions.style.display = "none";
+        abuseOptions.style.display = "none";
+        oopeOptions.style.display = "none";
+      }
+    });
+  });
+
+  document.querySelectorAll(".finding-type").forEach((radio) => {
+    radio.addEventListener("change", function () {
+      const abuseOptions = document.getElementById("abuse_options");
+      const oopeOptions = document.getElementById("oope_options");
+
+      // Hide all sub-options first
+      abuseOptions.style.display = "none";
+      oopeOptions.style.display = "none";
+
+      // Show relevant sub-options based on selection
+      if (this.value === "abuse") {
+        abuseOptions.style.display = "block";
+      } else if (this.value === "oope") {
+        oopeOptions.style.display = "block";
+      }
+    });
+  });
+
+  document.getElementById("getLocation").addEventListener("click", function () {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+
+          // Store coordinates in hidden fields
+          document.getElementById("latitude").value = latitude;
+          document.getElementById("longitude").value = longitude;
+
+          // Show coordinates in location field
+          document.getElementById(
+            "location"
+          ).value = `${latitude}, ${longitude}`;
+
+          // Optional: Reverse geocoding to get address
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.display_name) {
+                document.getElementById("location").value = data.display_name;
+              }
+            })
+            .catch((error) => console.error("Error getting address:", error));
+        },
+        function (error) {
+          alert("Error getting location: " + error.message);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  });
+
+  // Signature Pad Implementation
+  const canvas = document.getElementById("signatureCanvas");
+  const ctx = canvas.getContext("2d");
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  // Set canvas size
+  function resizeCanvas() {
+    const parentWidth = canvas.parentElement.offsetWidth;
+    canvas.width = parentWidth - 20;
+    canvas.height = 200;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  canvas.addEventListener("mousedown", startDrawing);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseup", stopDrawing);
+  canvas.addEventListener("mouseout", stopDrawing);
+
+  // Touch events
+  canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    lastX = touch.clientX - rect.left;
+    lastY = touch.clientY - rect.top;
+    isDrawing = true;
+  });
+
+  canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    drawLine(lastX, lastY, x, y);
+    lastX = x;
+    lastY = y;
+  });
+
+  canvas.addEventListener("touchend", stopDrawing);
+
+  function startDrawing(e) {
+    isDrawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    drawLine(lastX, lastY, e.offsetX, e.offsetY);
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  }
+
+  function drawLine(fromX, fromY, toX, toY) {
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.stroke();
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+    document.getElementById("signatureData").value = canvas.toDataURL();
+  }
+
+  document
+    .getElementById("clearSignature")
+    .addEventListener("click", function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById("signatureData").value = "";
+    });
+
+  // Update form submission to include signature
+  document.getElementById("auditForm").addEventListener("submit", function (e) {
+    document.getElementById("signatureData").value = canvas.toDataURL();
+  });
+</script>
+
+<style>
+  .bg-gradient-primary {
+    background: linear-gradient(45deg, #1a237e, #0d47a1);
+  }
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .form-control-lg,
+  .form-select-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+  .card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+  }
+  #signatureCanvas {
+    background: #fff;
+    cursor: crosshair;
+  }
+</style>
+{% endblock %}

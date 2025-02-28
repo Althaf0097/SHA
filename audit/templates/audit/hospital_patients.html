@@ -1,0 +1,1161 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    {% if not hospital %}
+    <!-- Hospital Creation Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Create Hospital</h5>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'create_hospital' %}">
+                {% csrf_token %}
+                <input type="hidden" name="hospital_id" value="{{ hospital_id }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Hospital Name</label>
+                            <input type="text" class="form-control" name="ehcp_name" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>District</label>
+                            <select class="form-control" name="district" required>
+                                {% for district in districts %}
+                                <option value="{{ district.id }}">{{ district.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Hospital Type</label>
+                            <select class="form-control" name="ehcp_type" required>
+                                <option value="Public">Public</option>
+                                <option value="Private">Private</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">Create Hospital</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="card bg-gradient-primary text-white mb-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    {% if hospital %}
+                    <h1 class="display-5 mb-0">{{ hospital.ehcp_name }}</h1>
+                    <p class="lead mb-0">Hospital ID: {{ hospital.hospital_id }} | District: {{ hospital.district.name }}</p>
+                    {% else %}
+                    <h1 class="display-5 mb-0">New Hospital</h1>
+                    <p class="lead mb-0">Hospital ID: {{ hospital_id }}</p>
+                    {% endif %}
+                </div>
+                {% if hospital %}
+                <div class="d-flex gap-2">
+                    <a href="{% url 'download_patient_excel' hospital.hospital_id %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-file-excel me-2"></i>Download Excel
+                    </a>
+                    <button class="btn btn-light btn-lg" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                        <i class="fas fa-plus me-2"></i>Add New Patient
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if hospital %}
+    <!-- Patient List -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Patient Name</th>
+                            <th>Mobile Number</th>
+                            <th>Admission Date</th>
+                            <th>Discharge Date</th>
+                            <th>Package Name</th>
+                            <th>Package Code</th>
+                            <th>Mandatory Records</th>
+                            <th>Deviations</th>
+                            <th>OOPE Amount</th>
+                            <th>Documents</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr data-patient-id="{{ patient.id }}">
+                            <td>{{ patient.case_id }}</td>
+                            <td>{{ patient.patient_name }}</td>
+                            <td>{{ patient.mobile_number }}</td>
+                            <td>{{ patient.admission_date|date:"d/m/Y" }}</td>
+                            <td>{{ patient.discharge_date|date:"d/m/Y" }}</td>
+                            <td>{{ patient.package_name }}</td>
+                            <td>{{ patient.package_code }}</td>
+                            <td>
+                                {% if patient.missing_records %}
+                                    <span class="badge bg-danger">No</span>
+                                {% else %}
+                                    <span class="badge bg-success">Yes</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if patient.deviations %}
+                                    <ul class="list-unstyled mb-0">
+                                        {% for deviation in patient.deviations %}
+                                            <li class="text-warning">{{ deviation|title }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <span class="badge bg-success">None</span>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ patient.total_oope|default:"0" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if patient.patient_photo %}
+                                        <a href="{{ patient.patient_photo.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Patient Photo">
+                                            <i class="fas fa-user-circle"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if patient.case_file %}
+                                        <a href="{{ patient.case_file.url }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Case File">
+                                            <i class="fas fa-file-medical"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if patient.discharge_summary %}
+                                        <a href="{{ patient.discharge_summary.url }}" target="_blank" class="btn btn-sm btn-outline-success" title="View Discharge Summary">
+                                            <i class="fas fa-file-medical-alt"></i>
+                                        </a>
+                                    {% endif %}
+                                    {% if patient.bills_documents %}
+                                        <a href="{{ patient.bills_documents.url }}" target="_blank" class="btn btn-sm btn-outline-warning" title="View Bills & Documents">
+                                            <i class="fas fa-file-invoice-dollar"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-info btn-sm" 
+                                            onclick="viewPatient('{{ patient.id }}')" 
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" 
+                                            onclick="editPatient('{{ patient.id }}')" 
+                                            title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" 
+                                            onclick="deletePatient('{{ patient.id }}')" 
+                                            title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="12" class="text-center py-4">
+                                <p class="text-muted mb-0">No patients found for this hospital</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Patient Modal -->
+<div class="modal fade" id="addPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Patient Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Case ID / IP Number*</label>
+                                <input type="text" class="form-control" name="case_id" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Patient Name*</label>
+                                <input type="text" class="form-control" name="patient_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control" name="mobile_number">
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Admission Date*</label>
+                                <input type="date" class="form-control" name="admission_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Discharge Date</label>
+                                <input type="date" class="form-control" name="discharge_date">
+                            </div>
+                        </div>
+
+                        <!-- Package Details -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Package Name*</label>
+                                <input type="text" class="form-control" name="package_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Package Code</label>
+                                <input type="text" class="form-control" name="package_code">
+                            </div>
+                        </div>
+
+                        <!-- Deviations -->
+                        <div class="col-12">
+                            <h5 class="mb-3">Deviations Found</h5>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="missing_records" id="missing_records">
+                                <label class="form-check-label" for="missing_records">Missing Records</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="money_collection" id="money_collection">
+                                <label class="form-check-label" for="money_collection">Money Collection</label>
+                            </div>
+                        </div>
+
+                        <!-- OOPE -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Total Out of Pocket Expenses (OOPE)</label>
+                                <input type="number" step="0.01" class="form-control" name="total_oope" value="0">
+                            </div>
+                        </div>
+
+                        <!-- Files -->
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">Case File (with Patient Photo)*</label>
+                                <input type="file" class="form-control" name="case_file" id="case_file" accept=".pdf,.doc,.docx,image/*" required>
+                                <small class="text-muted">Accepted formats: PDF, DOC, DOCX, Images</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-3">
+                            <div class="form-group">
+                                <label class="form-label">Are mandatory records maintained in case file?*</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="records_maintained" id="records_yes" value="yes" required>
+                                    <label class="form-check-label" for="records_yes">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="records_maintained" id="records_no" value="no">
+                                    <label class="form-check-label" for="records_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Digital Signature -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label">Digital Signature*</label>
+                                <div class="border rounded p-3">
+                                    <canvas id="signatureCanvas" class="border w-100" height="200"></canvas>
+                                    <input type="hidden" name="digital_signature" id="signatureData">
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-secondary" onclick="clearSignature()">Clear Signature</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label">Case Summary / Remarks</label>
+                                <textarea class="form-control" name="case_summary" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Audit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Patient Modal -->
+<div class="modal fade" id="viewPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Patient Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewPatientContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Patient Modal -->
+<div class="modal fade" id="editPatientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Patient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="editPatientForm" class="needs-validation" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="edit_patient">
+                <input type="hidden" name="patient_id" id="edit_patient_id">
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <!-- Basic Information -->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Case ID / IP Number*</label>
+                                <input type="text" class="form-control" name="case_id" id="edit_case_id" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Patient Name*</label>
+                                <input type="text" class="form-control" name="patient_name" id="edit_patient_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control" name="mobile_number" id="edit_mobile_number">
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Admission Date*</label>
+                                <input type="date" class="form-control" name="admission_date" id="edit_admission_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Discharge Date</label>
+                                <input type="date" class="form-control" name="discharge_date" id="edit_discharge_date">
+                            </div>
+                        </div>
+
+                        <!-- Package Details -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Package Name*</label>
+                                <input type="text" class="form-control" name="package_name" id="edit_package_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Package Code</label>
+                                <input type="text" class="form-control" name="package_code" id="edit_package_code">
+                            </div>
+                        </div>
+
+                        <!-- Deviations -->
+                        <div class="col-12">
+                            <h5 class="mb-3">Deviations Found</h5>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="missing_records" id="edit_missing_records">
+                                <label class="form-check-label" for="edit_missing_records">Missing Records</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" name="money_collection" id="edit_money_collection">
+                                <label class="form-check-label" for="edit_money_collection">Money Collection</label>
+                            </div>
+                        </div>
+
+                        <!-- OOPE -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Total Out of Pocket Expenses (OOPE)</label>
+                                <input type="number" step="0.01" class="form-control" name="total_oope" id="edit_total_oope" value="0">
+                            </div>
+                        </div>
+
+                        <!-- Files -->
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">Case File (with Patient Photo)*</label>
+                                <input type="file" class="form-control" name="case_file" id="edit_case_file" accept=".pdf,.doc,.docx,image/*" required>
+                                <small class="text-muted">Accepted formats: PDF, DOC, DOCX, Images</small>
+                                <div id="current_case_file" class="mt-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mt-3">
+                            <div class="form-group">
+                                <label class="form-label">Are mandatory records maintained in case file?*</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="records_maintained" id="edit_records_yes" value="yes" required>
+                                    <label class="form-check-label" for="edit_records_yes">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="records_maintained" id="edit_records_no" value="no">
+                                    <label class="form-check-label" for="edit_records_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Digital Signature -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label">Digital Signature*</label>
+                                <div class="border rounded p-3">
+                                    <canvas id="editSignatureCanvas" class="border w-100" height="200"></canvas>
+                                    <input type="hidden" name="digital_signature" id="editSignatureData">
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-secondary" onclick="clearEditSignature()">Clear Signature</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label">Case Summary / Remarks</label>
+                                <textarea class="form-control" name="case_summary" id="edit_case_summary" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this patient record? This action cannot be undone.</p>
+                <div class="alert alert-warning">
+                    <strong>Patient Details:</strong>
+                    <ul class="mb-0">
+                        <li>Case ID: <span id="delete-case-id"></span></li>
+                        <li>Patient Name: <span id="delete-patient-name"></span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete Patient</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentViewerModalLabel">View Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="documentViewer">
+                    <!-- Document will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn btn-primary" id="downloadDocument" download>
+                    <i class="fas fa-download me-2"></i>Download
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    // Show/hide sections based on selected finding type
+    $('input[name="findings_type"]').change(function() {
+        $('.finding-section').hide();
+        if (this.value === 'audit_findings') {
+            $('#audit_findings_section').show();
+        } else if (this.value === 'hnqa_related') {
+            $('#hnqa_related_section').show();
+        } else if (this.value === 'other_fraudulent_activities') {
+            $('#other_fraudulent_section').show();
+        }
+    });
+
+    // Show/hide sub-sections based on finding type selection
+    $('input[name="finding_type"]').change(function() {
+        $('.sub-section').hide();
+        if (this.value === 'Abuse') {
+            $('#abuse_type_section').show();
+        } else if (this.value === 'OOPE') {
+            $('#oope_type_section').show();
+        }
+    });
+
+    // Show/hide HNQA sub-sections
+    $('input[name="hnqa_type"]').change(function() {
+        $('.sub-section').hide();
+        if (this.value === 'Infrastructure') {
+            $('#infrastructure_type_section').show();
+        } else if (this.value === 'Human Resource') {
+            $('#hr_type_section').show();
+        }
+    });
+
+    // Trigger change event on page load to show correct sections
+    $('input[name="findings_type"]:checked').trigger('change');
+    $('input[name="finding_type"]:checked').trigger('change');
+    $('input[name="hnqa_type"]:checked').trigger('change');
+});
+</script>
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #1a237e, #0d47a1);
+    }
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1.5rem;
+    }
+    .modal-header, .modal-footer {
+        background-color: #f8f9fa;
+    }
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+
+<script>
+function initializeFilters() {
+    const table = document.querySelector('table');
+    if (!table) return;
+
+    // Create filter container
+    const filterDiv = document.createElement('div');
+    filterDiv.className = 'card mb-4';
+    filterDiv.innerHTML = `
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Search & Filter</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by Case ID, Name, Mobile...">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="packageFilter">
+                        <option value="">All Packages</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="recordsFilter">
+                        <option value="">All Records</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="dateFilter">
+                        <option value="">All Dates</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Insert filter before table
+    table.parentNode.insertBefore(filterDiv, table);
+
+    // Get all rows
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.getElementsByTagName('tr'));
+
+    // Populate package filter
+    const packageFilter = document.getElementById('packageFilter');
+    const packages = [...new Set(rows.map(row => {
+        const packageCell = row.cells[5];
+        return packageCell ? packageCell.textContent.trim() : '';
+    }).filter(Boolean))];
+    
+    packages.forEach(package => {
+        const option = document.createElement('option');
+        option.value = package;
+        option.textContent = package;
+        packageFilter.appendChild(option);
+    });
+
+    // Add event listeners
+    document.getElementById('searchInput').addEventListener('input', filterTable);
+    packageFilter.addEventListener('change', filterTable);
+    document.getElementById('recordsFilter').addEventListener('change', filterTable);
+    document.getElementById('dateFilter').addEventListener('change', filterTable);
+}
+
+function filterTable() {
+    const table = document.querySelector('table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.getElementsByTagName('tr'));
+    
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const packageValue = document.getElementById('packageFilter').value.toLowerCase();
+    const recordsValue = document.getElementById('recordsFilter').value;
+    const dateValue = document.getElementById('dateFilter').value;
+
+    rows.forEach(row => {
+        if (row.cells.length <= 1) return; // Skip empty message row
+        
+        let showRow = true;
+        const cells = Array.from(row.cells);
+
+        // Search filter
+        const searchableText = cells.slice(0, 7).map(cell => cell.textContent.toLowerCase()).join(' ');
+        if (searchTerm && !searchableText.includes(searchTerm)) {
+            showRow = false;
+        }
+
+        // Package filter
+        if (packageValue && cells[5].textContent.toLowerCase() !== packageValue) {
+            showRow = false;
+        }
+
+        // Records filter
+        if (recordsValue) {
+            const recordsCell = cells[7].textContent.trim();
+            if (recordsValue === 'Yes' && !recordsCell.includes('Yes')) {
+                showRow = false;
+            } else if (recordsValue === 'No' && !recordsCell.includes('No')) {
+                showRow = false;
+            }
+        }
+
+        // Date filter
+        if (dateValue) {
+            const dateText = cells[3].textContent;
+            if (dateText) {
+                const [day, month, year] = dateText.split('/');
+                const admissionDate = new Date(year, month - 1, day);
+                const today = new Date();
+                
+                switch(dateValue) {
+                    case 'today':
+                        if (admissionDate.toDateString() !== today.toDateString()) {
+                            showRow = false;
+                        }
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(today.setDate(today.getDate() - 7));
+                        if (admissionDate < weekAgo) {
+                            showRow = false;
+                        }
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(today.setMonth(today.getMonth() - 1));
+                        if (admissionDate < monthAgo) {
+                            showRow = false;
+                        }
+                        break;
+                }
+            }
+        }
+
+        row.style.display = showRow ? '' : 'none';
+    });
+}
+
+// Initialize filters when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeFilters();
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showError(message) {
+    const errorToast = document.createElement('div');
+    errorToast.className = 'toast align-items-center text-white bg-danger border-0';
+    errorToast.setAttribute('role', 'alert');
+    errorToast.setAttribute('aria-live', 'assertive');
+    errorToast.setAttribute('aria-atomic', 'true');
+    
+    errorToast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    // Create toast container if it doesn't exist
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        toastContainer.style.zIndex = '1050';
+        document.body.appendChild(toastContainer);
+    }
+    
+    toastContainer.appendChild(errorToast);
+    const toast = new bootstrap.Toast(errorToast);
+    toast.show();
+    
+    // Remove the toast element after it's hidden
+    errorToast.addEventListener('hidden.bs.toast', function() {
+        errorToast.remove();
+    });
+}
+
+function deletePatient(patientId) {
+    // Get patient details from the table row
+    const row = document.querySelector(`tr[data-patient-id="${patientId}"]`);
+    if (!row) {
+        showError('Patient row not found');
+        return;
+    }
+
+    const caseId = row.cells[0].textContent;
+    const patientName = row.cells[1].textContent;
+    
+    if (confirm(`Are you sure you want to delete patient "${patientName}" (Case ID: ${caseId})?`)) {
+        fetch(`/audit/patient/${patientId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to delete patient');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Remove the row with animation
+                row.style.transition = 'all 0.3s ease-out';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                
+                setTimeout(() => {
+                    row.remove();
+                    
+                    // Create and show success toast
+                    const successToast = document.createElement('div');
+                    successToast.className = 'toast align-items-center text-white bg-success border-0';
+                    successToast.setAttribute('role', 'alert');
+                    successToast.setAttribute('aria-live', 'assertive');
+                    successToast.setAttribute('aria-atomic', 'true');
+                    
+                    successToast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                Patient "${patientName}" deleted successfully
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    `;
+                    
+                    let toastContainer = document.querySelector('.toast-container');
+                    if (!toastContainer) {
+                        toastContainer = document.createElement('div');
+                        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+                        toastContainer.style.zIndex = '1050';
+                        document.body.appendChild(toastContainer);
+                    }
+                    
+                    toastContainer.appendChild(successToast);
+                    const toast = new bootstrap.Toast(successToast);
+                    toast.show();
+                    
+                    // Remove the toast element after it's hidden
+                    successToast.addEventListener('hidden.bs.toast', function() {
+                        successToast.remove();
+                    });
+                }, 300);
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+        })
+        .catch(error => {
+            showError('Error deleting patient: ' + error.message);
+        });
+    }
+}
+
+function viewPatient(patientId) {
+    fetch(`/audit/patient/${patientId}/`)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch patient details');
+            return response.json();
+        })
+        .then(data => {
+            const content = document.getElementById('viewPatientContent');
+            content.innerHTML = `
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <p><strong>Case ID:</strong> ${data.case_id}</p>
+                        <p><strong>Patient Name:</strong> ${data.patient_name}</p>
+                        <p><strong>Mobile Number:</strong> ${data.mobile_number}</p>
+                        <p><strong>Admission Date:</strong> ${data.admission_date}</p>
+                        <p><strong>Discharge Date:</strong> ${data.discharge_date || 'Not discharged'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Package Name:</strong> ${data.package_name}</p>
+                        <p><strong>Package Code:</strong> ${data.package_code}</p>
+                        <p><strong>Total OOPE Amount:</strong> ₹${data.total_oope}</p>
+                        <p><strong>Deviations:</strong> ${data.deviations.join(', ')}</p>
+                    </div>
+                    <div class="col-12">
+                        <p><strong>Case Summary:</strong></p>
+                        <p>${data.case_summary || 'No summary available'}</p>
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('viewPatientModal')).show();
+        })
+        .catch(error => {
+            showError('Error loading patient details: ' + error.message);
+        });
+}
+
+function editPatient(patientId) {
+    fetch(`/audit/patient/${patientId}/`)
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch patient details');
+            return response.json();
+        })
+        .then(data => {
+            // Populate the edit form
+            document.getElementById('edit_case_id').value = data.case_id;
+            document.getElementById('edit_patient_name').value = data.patient_name;
+            document.getElementById('edit_mobile_number').value = data.mobile_number;
+            document.getElementById('edit_admission_date').value = data.admission_date;
+            document.getElementById('edit_discharge_date').value = data.discharge_date || '';
+            document.getElementById('edit_package_name').value = data.package_name;
+            document.getElementById('edit_package_code').value = data.package_code;
+            document.getElementById('edit_total_oope').value = data.total_oope;
+            document.getElementById('edit_money_collection').checked = data.money_collection;
+            document.getElementById('edit_missing_records').checked = data.missing_records;
+            document.getElementById('edit_case_summary').value = data.case_summary || '';
+            
+            // Update form action and show modal
+            const form = document.getElementById('editPatientForm');
+            form.action = `/audit/patient/${patientId}/edit/`;
+            
+            // Add form submit handler
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to update patient');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        throw new Error(data.error || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    showError('Error updating patient: ' + error.message);
+                });
+            };
+            
+            new bootstrap.Modal(document.getElementById('editPatientModal')).show();
+        })
+        .catch(error => {
+            showError('Error loading patient details: ' + error.message);
+        });
+}
+
+function viewDocument(url, title) {
+    const modal = new bootstrap.Modal(document.getElementById('documentViewerModal'));
+    const viewer = document.getElementById('documentViewer');
+    const modalTitle = document.getElementById('documentViewerModalLabel');
+    const downloadBtn = document.getElementById('downloadDocument');
+    
+    modalTitle.textContent = title;
+    downloadBtn.href = url;
+    
+    // Clear previous content
+    viewer.innerHTML = '';
+    
+    // Check file type
+    if (url.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        // Image file
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'img-fluid';
+        img.style.maxHeight = '70vh';
+        viewer.appendChild(img);
+    } else if (url.match(/\.(pdf)$/i)) {
+        // PDF file
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = '100%';
+        iframe.style.height = '70vh';
+        iframe.style.border = 'none';
+        viewer.appendChild(iframe);
+    } else {
+        // Other file types
+        const message = document.createElement('p');
+        message.className = 'text-muted';
+        message.innerHTML = `
+            <i class="fas fa-file fa-3x mb-3"></i><br>
+            This file type cannot be previewed.<br>
+            Please use the download button to view it.
+        `;
+        viewer.appendChild(message);
+    }
+    
+    modal.show();
+}
+
+// Digital Signature Handling
+const canvas = document.getElementById('signatureCanvas');
+const ctx = canvas.getContext('2d');
+const signatureInput = document.getElementById('signatureData');
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+
+// Set canvas size based on container width
+function resizeCanvas() {
+    const container = canvas.parentElement;
+    canvas.width = container.offsetWidth - 20; // Subtract padding
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Initialize canvas style
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 2;
+ctx.lineCap = 'round';
+ctx.lineJoin = 'round';
+
+// Drawing functions
+function startDrawing(e) {
+    isDrawing = true;
+    [lastX, lastY] = getCoordinates(e);
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    // Save signature data when drawing stops
+    signatureInput.value = canvas.toDataURL();
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+
+    const [currentX, currentY] = getCoordinates(e);
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(currentX, currentY);
+    ctx.stroke();
+
+    [lastX, lastY] = [currentX, currentY];
+}
+
+function getCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    return [x, y];
+}
+
+function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureInput.value = '';
+}
+
+// Event listeners for mouse and touch
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchend', stopDrawing);
+
+// Form submission validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!signatureInput.value) {
+        e.preventDefault();
+        alert('Please provide your digital signature before submitting.');
+    }
+});
+
+// Edit Modal Digital Signature Handling
+const editCanvas = document.getElementById('editSignatureCanvas');
+const editCtx = editCanvas.getContext('2d');
+const editSignatureInput = document.getElementById('editSignatureData');
+let editIsDrawing = false;
+let editLastX = 0;
+let editLastY = 0;
+
+// Set canvas size based on container width
+function resizeEditCanvas() {
+    const container = editCanvas.parentElement;
+    editCanvas.width = container.offsetWidth - 20; // Subtract padding
+}
+resizeEditCanvas();
+window.addEventListener('resize', resizeEditCanvas);
+
+// Initialize canvas style
+editCtx.strokeStyle = '#000';
+editCtx.lineWidth = 2;
+editCtx.lineCap = 'round';
+editCtx.lineJoin = 'round';
+
+// Drawing functions for edit modal
+function startEditDrawing(e) {
+    editIsDrawing = true;
+    [editLastX, editLastY] = getEditCoordinates(e);
+}
+
+function stopEditDrawing() {
+    editIsDrawing = false;
+    // Save signature data when drawing stops
+    editSignatureInput.value = editCanvas.toDataURL();
+}
+
+function drawEdit(e) {
+    if (!editIsDrawing) return;
+    e.preventDefault();
+
+    const [currentX, currentY] = getEditCoordinates(e);
+
+    editCtx.beginPath();
+    editCtx.moveTo(editLastX, editLastY);
+    editCtx.lineTo(currentX, currentY);
+    editCtx.stroke();
+
+    [editLastX, editLastY] = [currentX, currentY];
+}
+
+function getEditCoordinates(e) {
+    const rect = editCanvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    return [x, y];
+}
+
+function clearEditSignature() {
+    editCtx.clearRect(0, 0, editCanvas.width, editCanvas.height);
+    editSignatureInput.value = '';
+}
+
+// Event listeners for mouse and touch in edit modal
+editCanvas.addEventListener('mousedown', startEditDrawing);
+editCanvas.addEventListener('mousemove', drawEdit);
+editCanvas.addEventListener('mouseup', stopEditDrawing);
+editCanvas.addEventListener('mouseout', stopEditDrawing);
+
+editCanvas.addEventListener('touchstart', startEditDrawing);
+editCanvas.addEventListener('touchmove', drawEdit);
+editCanvas.addEventListener('touchend', stopEditDrawing);
+
+// Edit form submission validation
+document.getElementById('editPatientForm').addEventListener('submit', function(e) {
+    if (!editSignatureInput.value) {
+        e.preventDefault();
+        alert('Please provide your digital signature before submitting.');
+    }
+});
+
+// Function to load existing signature
+function loadExistingSignature(signatureData) {
+    if (signatureData) {
+        const img = new Image();
+        img.onload = function() {
+            editCtx.drawImage(img, 0, 0);
+            editSignatureInput.value = signatureData;
+        };
+        img.src = signatureData;
+    }
+}
+</script>
+{% endblock %}

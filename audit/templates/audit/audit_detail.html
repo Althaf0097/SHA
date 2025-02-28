@@ -1,0 +1,261 @@
+{% extends 'audit/base.html' %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>Audit Details</h2>
+        <div>
+            <a href="{% url 'edit_audit' audit.id %}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+            <a href="{% url 'audit_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5 class="card-title">Basic Information</h5>
+                <table class="table">
+                    <tr>
+                        <th>EHCP Name:</th>
+                        <td>{{ audit.ehcp_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>District:</th>
+                        <td>{{ audit.district_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Hospital ID:</th>
+                        <td>{{ audit.hospital_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>EHCP Type:</th>
+                        <td>{{ audit.ehcp_type }}</td>
+                    </tr>
+                    <tr>
+                        <th>Auditor:</th>
+                        <td>{{ audit.auditor_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Designation:</th>
+                        <td>{{ audit.designation }}</td>
+                    </tr>
+                    <tr>
+                        <th>Location:</th>
+                        <td>{{ audit.current_location }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5 class="card-title">Audit Information</h5>
+                <table class="table">
+                    <tr>
+                        <th>Audit Date & Time:</th>
+                        <td>{{ audit.visit_date|date:"d M Y" }} at {{ audit.visit_time|time:"g:i A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge {% if audit.status == 'Completed' %}bg-success{% else %}bg-warning{% endif %}">
+                                {{ audit.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>EKGP Patients:</th>
+                        <td>{{ audit.ekgp_patients }}</td>
+                    </tr>
+                    <tr>
+                        <th>PMJAY Patients:</th>
+                        <td>{{ audit.pmjay_patients }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Beneficiaries:</th>
+                        <td>{{ audit.beneficiaries }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Comprehensive Audit Findings Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Comprehensive Audit Findings</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Patient Records -->
+                        <div class="mb-4">
+                            <h5>Patient Records</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>KASP Patient Admitted (Hospital Record)</th>
+                                        <td>{{ audit.kasp_hospital_record }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>KASP Patient Admitted (TMS)</th>
+                                        <td>{{ audit.kasp_tms_record }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Beneficiaries Visited During Audit</th>
+                                        <td>{{ audit.beneficiaries_visited }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Audit Findings -->
+                        <div class="mb-4">
+                            <h5>Primary Findings</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>Finding Type</th>
+                                        <td>{{ audit.findings_type|title }}</td>
+                                    </tr>
+                                    {% if audit.audit_findings_value %}
+                                    <tr>
+                                        <th>Audit Finding Status</th>
+                                        <td>{{ audit.audit_findings_value }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if audit.finding_type %}
+                                    <tr>
+                                        <th>Finding Category</th>
+                                        <td>{{ audit.finding_type|title }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+
+                        {% if audit.remarks %}
+                        <!-- Remarks -->
+                        <div class="mb-4">
+                            <h5>Remarks</h5>
+                            <div class="p-3 bg-light rounded">
+                                {{ audit.remarks|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
+                                    {% if audit.finding_type %}
+                                    <tr>
+                                        <th>Specific Finding Type</th>
+                                        <td>{{ audit.finding_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- HNQA Related Findings -->
+                        {% if audit.hnqa_value %}
+                        <div class="mb-4">
+                            <h5>HNQA Related Findings</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>HNQA Status</th>
+                                        <td>{{ audit.hnqa_value }}</td>
+                                    </tr>
+                                    {% if audit.hnqa_type %}
+                                    <tr>
+                                        <th>HNQA Type</th>
+                                        <td>{{ audit.hnqa_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if audit.infrastructure_type %}
+                                    <tr>
+                                        <th>Infrastructure Issues</th>
+                                        <td>{{ audit.infrastructure_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if audit.hr_type %}
+                                    <tr>
+                                        <th>HR Issues</th>
+                                        <td>{{ audit.hr_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if audit.services_type %}
+                                    <tr>
+                                        <th>Service Issues</th>
+                                        <td>{{ audit.services_type }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Assessment Scores -->
+                        <div class="mb-4">
+                            <h5>Assessment Scores</h5>
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6>Infrastructure</h6>
+                                            <h3>{{ audit.infrastructure_score }}/100</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6>Service</h6>
+                                            <h3>{{ audit.service_score }}/100</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6>Documentation</h6>
+                                            <h3>{{ audit.documentation_score }}/100</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6>Feedback</h6>
+                                            <h3>{{ audit.feedback_score }}/100</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Observations and Recommendations -->
+                        <div class="mb-4">
+                            <h5>Detailed Assessment</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0">Observations</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ audit.observations|linebreaks }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">Recommendations</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>{{ audit.recommendations|linebreaks }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

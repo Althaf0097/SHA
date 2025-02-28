@@ -1,0 +1,230 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="card bg-gradient-primary text-white mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 mb-0">Audit Report</h1>
+                    <p class="lead mb-0">Comprehensive analysis of audit data</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-light">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                    <button onclick="exportToExcel()" class="btn btn-light">
+                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm bg-soft-primary rounded">
+                                <i class="fas fa-hospital-alt fa-2x text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">{{ total_audits }}</h4>
+                            <p class="text-muted mb-0">Total Audits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border-start border-success border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm bg-soft-success rounded">
+                                <i class="fas fa-map-marker-alt fa-2x text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">{{ total_districts }}</h4>
+                            <p class="text-muted mb-0">Districts Covered</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm bg-soft-info rounded">
+                                <i class="fas fa-users fa-2x text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1">{{ total_patients }}</h4>
+                            <p class="text-muted mb-0">Total Patients</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border-start border-warning border-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="avatar-sm bg-soft-warning rounded">
+                                <i class="fas fa-chart-line fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-1" id="completionRate">0%</h4>
+                            <p class="text-muted mb-0">Audit Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <div class="card h-100">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Monthly Audit Trends</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">This Year</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Last Year</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendsChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">District Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="districtPieChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- District-wise Statistics -->
+    <div class="card mb-4">
+        <div class="card-header bg-transparent">
+            <h5 class="card-title mb-0">District-wise Performance</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>District</th>
+                            <th>Total Audits</th>
+                            <th>Total Patients</th>
+                            <th>Completion Rate</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for district in district_stats %}
+                        <tr>
+                            <td>{{ district.name }}</td>
+                            <td>{{ district.audit_count }}</td>
+                            <td>{{ district.total_patients|default:0 }}</td>
+                            <td>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ district.completion_rate }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ district.completion_rate }}%</small>
+                            </td>
+                            <td>
+                                {% if district.audit_count > 0 %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Monthly Trends Chart
+    const monthlyData = {{ monthly_stats|safe }};
+    const monthlyCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(item => new Date(2024, item.visit_date__month - 1).toLocaleString('default', { month: 'short' })),
+            datasets: [{
+                label: 'Number of Audits',
+                data: monthlyData.map(item => item.audit_count),
+                borderColor: '#4e73df',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // District Distribution Pie Chart
+    const districtData = {{ district_stats|safe }};
+    const districtCtx = document.getElementById('districtPieChart').getContext('2d');
+    new Chart(districtCtx, {
+        type: 'doughnut',
+        data: {
+            labels: districtData.map(item => item.name),
+            datasets: [{
+                data: districtData.map(item => item.audit_count),
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#858796', '#5a5c69', '#2c9faf', '#3c9b64', '#6f42c1'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Calculate and update completion rate
+    const calculateCompletionRate = () => {
+        const totalAudits = {{ total_audits }};
+        const targetAudits = {{ total_districts }} * 12; // Assuming monthly target per district
+        const rate = Math.round((totalAudits / targetAudits) * 100);
+        document.getElementById('completionRate').textContent = rate + '%';
+    };
+    calculateCompletionRate();
+
+    // Export to Excel function
+    function exportToExcel() {
+        window.location.href = '{% url "download_all_data" %}';
+    }
+</script>
+{% endblock %}

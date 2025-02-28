@@ -1,0 +1,108 @@
+/* Custom Admin Styles */
+.dashboard-stats {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card.primary {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+}
+
+.stat-card.success {
+    background: linear-gradient(45deg, #1cc88a, #13855c);
+    color: white;
+}
+
+.stat-card.warning {
+    background: linear-gradient(45deg, #f6c23e, #dda20a);
+    color: white;
+}
+
+.stat-card.danger {
+    background: linear-gradient(45deg, #e74a3b, #be2617);
+    color: white;
+}
+
+.stat-card h3 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.stat-card p {
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Table Enhancements */
+.results {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.results thead th {
+    background: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+}
+
+.results tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+/* Form Styling */
+.form-row {
+    padding: 20px;
+    margin: 0 -5px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.submit-row {
+    padding: 15px 20px;
+    background: #f8f9fc;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Action Buttons */
+.button, input[type=submit], input[type=button], .submit-row input {
+    background: #4e73df;
+    color: white;
+    border-radius: 4px;
+    padding: 10px 15px;
+    border: none;
+    transition: background 0.2s;
+}
+
+.button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover {
+    background: #224abe;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+    .dashboard-stats {
+        padding: 10px;
+    }
+    
+    .stat-card {
+        margin-bottom: 10px;
+    }
+    
+    .results {
+        overflow-x: auto;
+    }
+}

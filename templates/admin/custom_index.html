@@ -1,0 +1,228 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static jazzmin %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+        <div>
+            <a href="{% url 'admin:audit_patient_add' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-user-plus fa-sm text-white-50"></i> Add New Patient
+            </a>
+            <a href="{% url 'admin:audit_ehcpaudit_add' %}" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm ml-2">
+                <i class="fas fa-plus fa-sm text-white-50"></i> New Audit
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <!-- Total Patients Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Patients</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_patients }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hospital-user fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Audits Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Audits</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_audits }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Districts Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Districts</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_districts }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-map-marked-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issues Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Issues Found</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ issues_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+                </div>
+                <div class="card-body">
+                    {% get_admin_log 10 as admin_log %}
+                    {% if not admin_log %}
+                    <p>No recent actions.</p>
+                    {% else %}
+                    <div class="timeline">
+                        {% for entry in admin_log %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if entry.is_addition %}bg-success{% elif entry.is_change %}bg-warning{% else %}bg-danger{% endif %}"></div>
+                            <div class="timeline-content">
+                                <h3 class="timeline-title">
+                                    {% if entry.is_addition %}Added{% elif entry.is_change %}Modified{% else %}Deleted{% endif %}
+                                    {{ entry.content_type }}
+                                </h3>
+                                <p>{{ entry.object_repr }}</p>
+                                <small class="text-muted">{{ entry.action_time|timesince }} ago by {{ entry.user }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-6 mb-3">
+                            <a href="{% url 'admin:audit_patient_add' %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-user-plus"></i> New Patient
+                            </a>
+                        </div>
+                        <div class="col-lg-6 mb-3">
+                            <a href="{% url 'admin:audit_ehcpaudit_add' %}" class="btn btn-success btn-block">
+                                <i class="fas fa-clipboard-check"></i> New Audit
+                            </a>
+                        </div>
+                        <div class="col-lg-6 mb-3">
+                            <a href="{% url 'admin:audit_district_add' %}" class="btn btn-info btn-block">
+                                <i class="fas fa-map-marker-plus"></i> Add District
+                            </a>
+                        </div>
+                        <div class="col-lg-6 mb-3">
+                            <a href="{% url 'admin:auth_user_add' %}" class="btn btn-warning btn-block">
+                                <i class="fas fa-user-shield"></i> Add User
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model List -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Navigation</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for app in app_list %}
+                            {% for model in app.models %}
+                                <div class="col-lg-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body p-3">
+                                            <h5 class="card-title mb-2">
+                                                <i class="fas {% if model.name == 'Users' %}fa-users{% elif model.name == 'Groups' %}fa-users-cog{% elif model.name == 'Patients' %}fa-user-injured{% elif model.name == 'Audits' %}fa-clipboard-check{% elif model.name == 'Districts' %}fa-map-marker-alt{% else %}fa-table{% endif %} mr-2"></i>
+                                                {{ model.name }}
+                                            </h5>
+                                            <div class="btn-group btn-group-sm">
+                                                {% if model.add_url %}
+                                                    <a href="{{ model.add_url }}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-plus"></i> Add
+                                                    </a>
+                                                {% endif %}
+                                                {% if model.admin_url %}
+                                                    <a href="{{ model.admin_url }}" class="btn btn-outline-info">
+                                                        <i class="fas fa-list"></i> View All
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+    }
+
+    .timeline-content {
+        background: #f8f9fc;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .timeline-title {
+        font-size: 14px;
+        margin: 0;
+        color: #4e73df;
+    }
+</style>
+{% endblock %}

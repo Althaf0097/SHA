@@ -1,0 +1,126 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/login.css' %}">
+{{ block.super }}
+<style>
+    body.login {
+        background: #f8f9fa;
+    }
+    .login #container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 26px;
+        margin-top: 100px;
+    }
+    .login #header {
+        padding: 15px 0;
+        background: transparent;
+    }
+    .login #content {
+        padding: 20px;
+    }
+    .submit-row {
+        padding: 20px 0 0 0;
+    }
+    .submit-row input {
+        width: 100%;
+        padding: 10px;
+        background: #2271b1;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .submit-row input:hover {
+        background: #135e96;
+    }
+    .form-row {
+        padding: 5px 0;
+    }
+    .form-row label {
+        display: block;
+        margin-bottom: 5px;
+        color: #444;
+    }
+    .form-row input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .errornote {
+        background: #fff6f7;
+        border: 1px solid #ffd7d8;
+        border-radius: 4px;
+        color: #d63638;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block bodyclass %}login{% endblock %}
+
+{% block usertools %}{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">
+{% blocktranslate count counter=form.errors.items|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">
+    {{ error }}
+</p>
+{% endfor %}
+{% endif %}
+
+<div id="content-main">
+{% if user.is_authenticated %}
+<p class="errornote">
+    {% blocktranslate trimmed %}
+    You are authenticated as {{ username }}, but are not authorized to
+    access this page. Would you like to login to a different account?
+    {% endblocktranslate %}
+</p>
+{% endif %}
+
+<form action="{% url 'login' %}" method="post" id="login-form">{% csrf_token %}
+  <div class="form-row">
+    {{ form.username.errors }}
+    {{ form.username.label_tag }}
+    {{ form.username }}
+  </div>
+  <div class="form-row">
+    {{ form.password.errors }}
+    {{ form.password.label_tag }}
+    {{ form.password }}
+    <input type="hidden" name="next" value="{{ next }}">
+  </div>
+  {% url 'admin_password_reset' as password_reset_url %}
+  {% if password_reset_url %}
+  <div class="password-reset-link">
+    <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+  </div>
+  {% endif %}
+  <div class="submit-row">
+    <input type="submit" value="{% translate 'Log in' %}">
+  </div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="card bg-gradient-primary text-white mb-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 mb-0">Hospital Records</h1>
+                    <p class="lead mb-0">View and manage patient records by hospital</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hospital List -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Hospital ID</th>
+                            <th>Hospital Name</th>
+                            <th>District</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hospital in hospitals %}
+                        <tr>
+                            <td>{{ hospital.hospital_id }}</td>
+                            <td>{{ hospital.ehcp_name }}</td>
+                            <td>{{ hospital.district__name }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'hospital_patients' hospital_id=hospital.hospital_id %}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-users me-2"></i>View Patients
+                                </a>
+                                <button onclick="editRecord('{{ hospital.hospital_id }}')"
+                                        class="btn btn-warning btn-sm ms-2">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </button>
+                                <button onclick="deleteRecord('{{ hospital.hospital_id }}')"
+                                        class="btn btn-danger btn-sm ms-2">
+                                    <i class="fas fa-trash me-2"></i>Delete
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4">
+                                <p class="text-muted mb-0">No hospitals found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #1a237e, #0d47a1);
+    }
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,294 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    :root {
+        --primary: #4e73df;
+        --secondary: #858796;
+        --success: #1cc88a;
+        --info: #36b9cc;
+        --warning: #f6c23e;
+        --danger: #e74a3b;
+        --light: #f8f9fc;
+        --dark: #5a5c69;
+    }
+
+    .dashboard-container {
+        padding: 1.5rem;
+        background: var(--light);
+    }
+
+    .dashboard-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .stat-card .icon {
+        float: right;
+        font-size: 2rem;
+        opacity: 0.3;
+    }
+
+    .stat-card .label {
+        font-size: 0.875rem;
+        color: var(--secondary);
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .stat-card .value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0.5rem 0;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-section {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .action-section h3 {
+        color: var(--dark);
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--light);
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 0.35rem;
+        color: white;
+        text-decoration: none;
+        margin: 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .action-button i {
+        margin-right: 0.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+    }
+
+    .btn-success {
+        background: var(--success);
+    }
+
+    .btn-info {
+        background: var(--info);
+    }
+
+    .recent-activity {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--light);
+        display: flex;
+        align-items: center;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background: var(--light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-time {
+        font-size: 0.875rem;
+        color: var(--secondary);
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="dashboard-title">Hospital Management Dashboard</h1>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-users icon"></i>
+            <div class="label">Total Patients</div>
+            <div class="value">{{ total_patients }}</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-clipboard-check icon"></i>
+            <div class="label">Total Audits</div>
+            <div class="value">{{ total_audits }}</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-map-marker-alt icon"></i>
+            <div class="label">Districts</div>
+            <div class="value">{{ total_districts }}</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-exclamation-triangle icon"></i>
+            <div class="label">Issues Found</div>
+            <div class="value">{{ total_issues }}</div>
+        </div>
+    </div>
+
+    <div class="actions-grid">
+        <div class="action-section">
+            <h3>Quick Actions</h3>
+            <a href="{% url 'admin:audit_patient_add' %}" class="action-button btn-primary">
+                <i class="fas fa-user-plus"></i> Add Patient
+            </a>
+            <a href="{% url 'admin:audit_fieldaudit_add' %}" class="action-button btn-success">
+                <i class="fas fa-plus-circle"></i> New Audit
+            </a>
+            <a href="{% url 'admin:audit_district_add' %}" class="action-button btn-info">
+                <i class="fas fa-map-marked-alt"></i> Add District
+            </a>
+        </div>
+
+        <div class="action-section">
+            <h3>Recent Activity</h3>
+            <div class="activity-list">
+                {% for entry in recent_actions %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-{{ entry.icon }}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ entry.title }}</div>
+                        <div class="activity-time">{{ entry.time }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="activity-item">
+                    <div class="activity-content">
+                        <div class="activity-title">No recent activity</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% trans 'My Actions' %}</h2>
+        {% load log %}
+        {% get_admin_log 10 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p>{% trans 'None available' %}</p>
+        {% else %}
+        <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="changelink">
+                {% if entry.is_addition %}
+                <i class="fas fa-plus-circle" style="color: var(--success)"></i>
+                {% elif entry.is_change %}
+                <i class="fas fa-edit" style="color: var(--warning)"></i>
+                {% elif entry.is_deletion %}
+                <i class="fas fa-minus-circle" style="color: var(--danger)"></i>
+                {% endif %}
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                {{ entry.object_repr }}
+                {% else %}
+                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br/>
+                {% if entry.content_type %}
+                <span class="mini quiet">{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}</span>
+                {% else %}
+                <span class="mini quiet">{% trans 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

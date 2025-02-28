@@ -1,0 +1,77 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Patient Information Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Patient Details</h6>
+            <div class="btn-group">
+                <a href="{% url 'edit_patient' patient.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Basic Information -->
+                <div class="col-md-6">
+                    <h5 class="mb-3">Basic Information</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="35%">Case ID / IP Number:</th>
+                            <td>{{ patient.case_id }}</td>
+                        </tr>
+                        <tr>
+                            <th>Patient Name:</th>
+                            <td>{{ patient.patient_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile Number:</th>
+                            <td>{{ patient.mobile_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>Admission Date:</th>
+                            <td>{{ patient.admission_date }}</td>
+                        </tr>
+                        <tr>
+                            <th>Discharge Date:</th>
+                            <td>{{ patient.discharge_date }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Package Details -->
+                <div class="col-md-6">
+                    <h5 class="mb-3">Package Details</h5>
+                    <table class="table table-borderless">
+                        <tr>
+                            <th width="35%">Package Name:</th>
+                            <td>{{ patient.package_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Package Code:</th>
+                            <td>{{ patient.package_code }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total OOPE:</th>
+                            <td>₹{{ patient.total_oope }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Case Summary -->
+                <div class="col-12 mt-4">
+                    <h5 class="mb-3">Case Summary</h5>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            {{ patient.case_summary|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

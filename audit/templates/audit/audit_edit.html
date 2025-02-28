@@ -1,0 +1,186 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="card bg-gradient-primary text-white mb-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 mb-0">Edit EHCP Audit</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="auditEditForm" class="needs-validation" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+            <!-- Basic Information Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- District Name -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">District Name*</label>
+                                    <select class="form-select form-select-lg" name="district" required>
+                                        <option value="">Select District</option>
+                                        {% for district in districts %}
+                                            <option value="{{ district }}" {% if audit.district.name == district %}selected{% endif %}>{{ district }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Name of EHCP -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Name of EHCP*</label>
+                                    <input type="text" class="form-control form-control-lg" name="ehcp_name" value="{{ audit.ehcp_name }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Hospital ID -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Hospital ID*</label>
+                                    <input type="text" class="form-control form-control-lg" name="hospital_id" value="{{ audit.hospital_id }}" required>
+                                </div>
+                            </div>
+
+                            <!-- EHCP Type -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">EHCP Type*</label>
+                                    <select class="form-select form-select-lg" name="ehcp_type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Public" {% if audit.ehcp_type == 'Public' %}selected{% endif %}>Public</option>
+                                        <option value="Private" {% if audit.ehcp_type == 'Private' %}selected{% endif %}>Private</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Information Card -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Audit Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Name of Auditor -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Name of Auditor*</label>
+                                    <input type="text" class="form-control form-control-lg" name="auditor_name" value="{{ audit.auditor_name }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Designation -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Designation*</label>
+                                    <input type="text" class="form-control form-control-lg" name="designation" value="{{ audit.designation }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Visit Details -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Date of Visit*</label>
+                                    <input type="date" class="form-control form-control-lg" name="visit_date" value="{{ audit.visit_date|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Time*</label>
+                                    <input type="time" class="form-control form-control-lg" name="visit_time" value="{{ audit.visit_time|time:'H:i' }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Location*</label>
+                                    <input type="text" class="form-control form-control-lg" name="current_location" value="{{ audit.current_location }}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient Statistics Card -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h4 class="mb-0"><i class="fas fa-users me-2"></i>Patient Statistics</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">EKGP Patients</label>
+                                    <input type="number" class="form-control form-control-lg" name="ekgp_patients" value="{{ audit.ekgp_patients }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">PMJAY Patients</label>
+                                    <input type="number" class="form-control form-control-lg" name="pmjay_patients" value="{{ audit.pmjay_patients }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label class="form-label">Total Beneficiaries</label>
+                                    <input type="number" class="form-control form-control-lg" name="beneficiaries" value="{{ audit.beneficiaries }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Update Audit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% block extra_js %}
+<script>
+    // Auto-calculate beneficiaries
+    document.addEventListener('DOMContentLoaded', function() {
+        const ekgpInput = document.querySelector('input[name="ekgp_patients"]');
+        const pmjayInput = document.querySelector('input[name="pmjay_patients"]');
+        const beneficiariesInput = document.querySelector('input[name="beneficiaries"]');
+
+        function updateBeneficiaries() {
+            const ekgp = parseInt(ekgpInput.value) || 0;
+            const pmjay = parseInt(pmjayInput.value) || 0;
+            beneficiariesInput.value = ekgp + pmjay;
+        }
+
+        ekgpInput.addEventListener('input', updateBeneficiaries);
+        pmjayInput.addEventListener('input', updateBeneficiaries);
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        transition: transform 0.2s;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+    .quick-action {
+        padding: 15px;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    .quick-action:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    .activity-item {
+        padding: 10px;
+        border-left: 3px solid #007bff;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+    }
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">Welcome back, {{ request.user.username }}!</h4>
+                        <p class="mb-0">Here's what's happening in your hospital today.</p>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0">{{ current_date|date:"l, F j, Y" }}</p>
+                        <small>Last login: {{ request.user.last_login|date:"M j, Y H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Patients</h6>
+                            <h3 class="mb-0">{{ total_patients }}</h3>
+                            <small class="text-success">↑ 12% this month</small>
+                        </div>
+                        <div class="stat-icon bg-primary-subtle">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Today's Appointments</h6>
+                            <h3 class="mb-0">{{ todays_appointments }}</h3>
+                            <small class="text-danger">↓ 3% vs yesterday</small>
+                        </div>
+                        <div class="stat-icon bg-success-subtle">
+                            <i class="fas fa-calendar-check text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Available Doctors</h6>
+                            <h3 class="mb-0">{{ available_doctors }}</h3>
+                            <small class="text-muted">Out of {{ total_doctors }}</small>
+                        </div>
+                        <div class="stat-icon bg-warning-subtle">
+                            <i class="fas fa-user-md text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card dashboard-card bg-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Revenue (Monthly)</h6>
+                            <h3 class="mb-0">₹{{ monthly_revenue }}</h3>
+                            <small class="text-success">↑ 8% vs last month</small>
+                        </div>
+                        <div class="stat-icon bg-info-subtle">
+                            <i class="fas fa-chart-line text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="quick-action" onclick="location.href='{% url 'audit_form' %}'">
+                                <i class="fas fa-plus-circle text-primary mb-2"></i>
+                                <h6 class="mb-1">New Audit</h6>
+                                <small class="text-muted">Create a new audit report</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="quick-action" onclick="location.href='{% url 'view_records' %}'">
+                                <i class="fas fa-folder-open text-warning mb-2"></i>
+                                <h6 class="mb-1">View Records</h6>
+                                <small class="text-muted">Access patient records</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="quick-action" onclick="location.href='#'">
+                                <i class="fas fa-user-plus text-success mb-2"></i>
+                                <h6 class="mb-1">Add User</h6>
+                                <small class="text-muted">Create new user account</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="quick-action" onclick="location.href='#'">
+                                <i class="fas fa-cog text-info mb-2"></i>
+                                <h6 class="mb-1">Settings</h6>
+                                <small class="text-muted">System configuration</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>New Audit Created</strong>
+                            <small class="text-muted">2 mins ago</small>
+                        </div>
+                        <p class="mb-0">Dr. Smith completed audit for Central Hospital</p>
+                    </div>
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>User Account Created</strong>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                        <p class="mb-0">New auditor account created for Jane Doe</p>
+                    </div>
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between">
+                            <strong>Report Generated</strong>
+                            <small class="text-muted">3 hours ago</small>
+                        </div>
+                        <p class="mb-0">Monthly audit report generated for District A</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-8 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Audit Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="auditChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Compliance Rate</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="complianceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Audit Statistics Chart
+    const auditCtx = document.getElementById('auditChart').getContext('2d');
+    new Chart(auditCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Completed Audits',
+                data: [65, 59, 80, 81, 56, 55],
+                borderColor: '#0d6efd',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Compliance Rate Chart
+    const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+    new Chart(complianceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Compliant', 'Non-Compliant'],
+            datasets: [{
+                data: [75, 25],
+                backgroundColor: ['#198754', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

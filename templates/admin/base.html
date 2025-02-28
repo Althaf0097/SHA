@@ -1,0 +1,252 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{% static 'css/admin-custom.css' %}">
+{% endblock %}
+
+{% block nav-global %}
+<button class="navbar-toggler" type="button" id="sidebarToggle">
+    <i class="fas fa-bars"></i>
+</button>
+{% endblock %}
+
+{% block usertools %}
+<div class="usertools">
+    {% if has_permission %}
+    <div class="welcome-msg">
+        Welcome,
+        <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+    </div>
+    {% endif %}
+    {% block userlinks %}
+    {% if site_url %}
+    <a href="{{ site_url }}" class="btn btn-outline-light btn-sm">
+        <i class="fas fa-globe"></i> View Site
+    </a>
+    {% endif %}
+    {% if user.is_active and user.is_staff %}
+    {% url 'django-admindocs-docroot' as docsroot %}
+    {% if docsroot %}
+    <a href="{{ docsroot }}" class="btn btn-outline-info btn-sm">
+        <i class="fas fa-book"></i> Documentation
+    </a>
+    {% endif %}
+    {% endif %}
+    {% if user.has_usable_password %}
+    <a href="{% url 'admin:password_change' %}" class="btn btn-outline-warning btn-sm">
+        <i class="fas fa-key"></i> Change password
+    </a>
+    {% endif %}
+    <a href="{% url 'admin:logout' %}" class="btn btn-outline-danger btn-sm">
+        <i class="fas fa-sign-out-alt"></i> Log out
+    </a>
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-hospital-alt"></i> 
+        Hospital Management System
+    </a>
+</h1>
+{% endblock %}
+
+{% block footer %}
+<footer class="footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <span class="text-muted">Hospital Management System &copy; {% now "Y" %}</span>
+            </div>
+            <div class="col-md-6 text-right">
+                <span class="text-muted">Version 1.0</span>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --primary: #4e73df;
+        --secondary: #858796;
+        --success: #1cc88a;
+        --info: #36b9cc;
+        --warning: #f6c23e;
+        --danger: #e74a3b;
+        --light: #f8f9fc;
+        --dark: #5a5c69;
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    /* Improve header appearance */
+    #header {
+        background: linear-gradient(90deg, var(--primary) 0%, #224abe 100%);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Style the branding */
+    #branding h1 {
+        font-weight: 700;
+        color: white;
+    }
+
+    /* Enhance navigation */
+    .module h2, .module caption, .inline-group h2 {
+        background: var(--primary);
+        color: white;
+        padding: 12px 15px;
+        border-radius: 4px 4px 0 0;
+    }
+
+    /* Style buttons */
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary);
+        color: white;
+        border-radius: 4px;
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover {
+        background: #224abe;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(78, 115, 223, 0.25);
+    }
+
+    /* Style form elements */
+    .form-row {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Enhance messages */
+    .messagelist li {
+        padding: 12px 15px;
+        margin: 0 0 10px 0;
+        border-radius: 4px;
+        border: none;
+    }
+
+    /* Style tables */
+    #changelist table {
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    #changelist table thead th {
+        background: var(--light);
+        color: var(--primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+
+    #changelist table tbody tr:hover {
+        background-color: rgba(78, 115, 223, 0.05);
+    }
+
+    /* Dashboard styling */
+    .dashboard #content {
+        width: 100%;
+    }
+
+    .dashboard .module table th,
+    .dashboard .module table td {
+        padding: 12px 15px;
+    }
+
+    /* Custom status badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Animations */
+    .fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block extrajs %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add fade-in animation to main content
+    const content = document.getElementById('content');
+    if (content) {
+        content.classList.add('fade-in');
+    }
+
+    // Enhance table row hover effect
+    const tableRows = document.querySelectorAll('#changelist table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseover', () => {
+            row.style.transform = 'translateX(5px)';
+            row.style.transition = 'all 0.3s ease';
+        });
+        row.addEventListener('mouseout', () => {
+            row.style.transform = 'translateX(0)';
+        });
+    });
+
+    // Sidebar Toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const content = document.querySelector('#content');
+
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+            content.classList.toggle('toggled');
+        });
+    }
+
+    // Add loading animation to buttons
+    const buttons = document.querySelectorAll('.submit-row input[type="submit"], .submit-row input[type="button"]');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.add('loading');
+        });
+    });
+
+    // Responsive tables
+    const tables = document.querySelectorAll('table');
+    tables.forEach(table => {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('table-responsive');
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+
+    // Add animation to cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.classList.add('animated');
+    });
+});
+</script>
+{% endblock %}

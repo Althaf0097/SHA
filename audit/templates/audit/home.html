@@ -1,0 +1,277 @@
+{% extends 'audit/base.html' %}
+{% load static %}
+
+{% block title %}FIELD AUDIT INSIGHT - Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="custom-card p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 mb-1">Welcome to FIELD AUDIT INSIGHT</h1>
+                    <p class="text-muted mb-0">Monitor and manage healthcare audits efficiently</p>
+                </div>
+                <div class="text-end">
+                    <p class="mb-0"><i class="fas fa-calendar-alt me-2"></i>{{ current_date|date:"l, F j, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Audit Findings Graph -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="custom-card p-4">
+            <h5 class="card-title mb-4">Overall Audit Findings</h5>
+            <div class="chart-container" style="position: relative; height:400px;">
+                <canvas id="auditFindingsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="custom-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-2">Total Audits</h6>
+                    <h2 class="mb-0">{{ total_audits }}</h2>
+                </div>
+                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-clipboard-check fa-2x text-primary"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="custom-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-2">Recent Audits</h6>
+                    <h2 class="mb-0">{{ recent_audits.count }}</h2>
+                </div>
+                <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="custom-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-2">Districts</h6>
+                    <h2 class="mb-0">14</h2>
+                </div>
+                <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-map-marker-alt fa-2x text-info"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 65%"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="custom-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-2">Latest Update</h6>
+                    <h2 class="mb-0">{{ recent_audits.0.visit_date|date:"M d"|default:"N/A" }}</h2>
+                </div>
+                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                    <i class="fas fa-clock fa-2x text-warning"></i>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 4px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 50%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions and Recent Audits -->
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-xl-4 mb-4">
+        <div class="custom-card h-100">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body px-4">
+                <div class="d-grid gap-3">
+                    <a href="{% url 'audit_form' %}" class="btn btn-primary btn-custom">
+                        <i class="fas fa-plus-circle me-2"></i>New Audit
+                    </a>
+                    <a href="{% url 'view_records' %}" class="btn btn-info btn-custom text-white">
+                        <i class="fas fa-search me-2"></i>Search Records
+                    </a>
+                    <a href="{% url 'report' %}" class="btn btn-success btn-custom">
+                        <i class="fas fa-chart-bar me-2"></i>Generate Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Audits -->
+    <div class="col-xl-8 mb-4">
+        <div class="custom-card h-100">
+            <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2 text-primary"></i>Recent Audits</h5>
+                    <a href="{% url 'view_records' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+            </div>
+            <div class="card-body px-4">
+                <div class="table-responsive">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>EHCP Name</th>
+                                <th>District</th>
+                                <th>Visit Date</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for audit in recent_audits %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-hospital text-primary me-2"></i>
+                                        {{ audit.ehcp_name }}
+                                    </div>
+                                </td>
+                                <td>{{ audit.district.name }}</td>
+                                <td>{{ audit.visit_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badge bg-{{ audit.ehcp_type|lower }}-subtle text-{{ audit.ehcp_type|lower }}">
+                                        {{ audit.ehcp_type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Completed</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-2x mb-3 text-muted"></i>
+                                    <p class="mb-0">No recent audits found</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-info-subtle { background-color: rgba(13, 202, 240, 0.1); }
+    
+    .text-primary-subtle { color: rgb(13, 110, 253); }
+    .text-success-subtle { color: rgb(25, 135, 84); }
+    .text-warning-subtle { color: rgb(255, 193, 7); }
+    .text-info-subtle { color: rgb(13, 202, 240); }
+    
+    .custom-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .progress-bar {
+        border-radius: 2px;
+    }
+    
+    .table th {
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('auditFindingsChart').getContext('2d');
+        var auditFindingsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Documentation Complete', 'Missing Records', 'Compliance Issues', 'Process Gaps', 'Best Practices'],
+                datasets: [{
+                    label: 'Number of Findings',
+                    data: [{{ documentation_complete }}, {{ missing_records }}, {{ compliance_issues }}, {{ process_gaps }}, {{ best_practices }}],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Cases'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Finding Categories'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution of Audit Findings'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
