@@ -10,18 +10,22 @@
       "src": "build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles_build"
+        "distDir": "staticfiles_build",
+        "outputDirectory": "staticfiles_build"
       }
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/staticfiles_build/static/$1"
     },
     {
       "src": "/(.*)",
       "dest": "hospital_management/wsgi.py"
     }
-  ]
+  ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "hospital_management.settings_prod"
+  }
 }
