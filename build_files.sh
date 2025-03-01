@@ -1,13 +1,18 @@
+#!/bin/bash
+
 # Build Script for Vercel
 
-# Create python virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-source .venv/bin/activate
-
-# Install python dependencies
+echo "Installing dependencies..."
 pip install -r requirements.txt
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
+echo "Creating staticfiles directory..."
+mkdir -p staticfiles_build/static
+
+echo "Copying static files..."
+cp -r staticfiles/* staticfiles_build/static/
 
 # Collect static files
 python manage.py collectstatic --noinput
